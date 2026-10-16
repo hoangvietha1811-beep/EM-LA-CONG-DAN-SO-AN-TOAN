@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu Học Tập: Em Là Công Dân Số An Toàn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #fff0f5; /* Soft pastel pink */
+            color: #4b5563;
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #fca5a5, #f472b6, #c084fc);
+        }
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 2px solid #fbcfe8; /* pink-200 */
+            box-shadow: 0 10px 15px -3px rgba(251, 207, 232, 0.4), 0 4px 6px -2px rgba(251, 207, 232, 0.2);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: white;
+        }
+        .bg-section-1 { background-color: #fb923c; } /* orange */
+        .bg-section-2 { background-color: #34d399; } /* mint */
+        .bg-section-3 { background-color: #fb7185; } /* rose */
+        .bg-section-4 { background-color: #818cf8; } /* indigo */
+        .bg-section-5 { background-color: #a78bfa; } /* purple */
+        
+        .option-label {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 2px solid #f3f4f6;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-label:hover {
+            background-color: #fdf2f8; /* pink-50 */
+            border-color: #fbcfe8; /* pink-200 */
+            transform: translateY(-2px);
+        }
+        input[type="radio"]:checked + .option-label {
+            border-color: #f472b6; /* pink-400 */
+            background-color: #fdf2f8;
+            box-shadow: 0 4px 6px -1px rgba(244, 114, 182, 0.2);
+            color: #db2777;
+        }
+        
+        /* Matching Styles */
+        .match-item {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+            background-color: #ffffff;
+            font-weight: 700;
+            color: #4b5563;
+        }
+        .match-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .match-item.selected {
+            border-color: #f472b6;
+            box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.3);
+        }
+        
+        .drop-zone {
+            min-height: 120px;
+            border: 3px dashed #cbd5e1;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: #f8fafc;
+            transition: all 0.3s;
+        }
+        .drop-zone.dragover {
+            background-color: #f1f5f9;
+            border-color: #94a3b8;
+            transform: scale(1.02);
+        }
+        .drag-item {
+            cursor: grab;
+            padding: 0.75rem 1rem;
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: inline-block;
+            margin: 0.25rem;
+            user-select: none;
+            transition: transform 0.2s;
+            font-weight: 700;
+        }
+        .drag-item:hover {
+            transform: translateY(-2px);
+            border-color: #fbcfe8;
+        }
+        .drag-item.selected {
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.3);
+        }
+        .drag-item:active { cursor: grabbing; transform: scale(0.95); }
+
+        /* Status Colors */
+        .correct-text { color: #15803d; font-weight: 800; }
+        .wrong-text { color: #e11d48; font-weight: 800; }
+        .correct-bg { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #166534; }
+        .wrong-bg { background-color: #ffe4e6 !important; border-color: #e11d48 !important; color: #9f1239; }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 4px solid #fbcfe8;
+        }
+    </style>
+</head>
+<body class="pb-20">
+
+    <!-- Header -->
+    <header class="gradient-header text-white pt-10 pb-16 px-4 text-center rounded-b-3xl shadow-lg relative">
+        <button onclick="openLoginModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-sm rounded-full backdrop-blur-sm transition font-bold shadow-sm">Quản trị ⚙️</button>
+        <h2 class="text-sm uppercase tracking-widest font-extrabold mb-2">Phiếu Học Tập Tương Tác ✨</h2>
+        <h1 id="display-lesson-title" class="text-3xl md:text-5xl font-black mb-4 drop-shadow-md">Em Là Công Dân Số An Toàn</h1>
+        <p class="text-white/90 font-bold text-lg" id="display-subject-grade">Môn: Hoạt động trải nghiệm • Lớp 7</p>
+    </header>
+
+    <!-- Student Info Form -->
+    <div class="max-w-4xl mx-auto px-4 -mt-8 relative z-10">
+        <div class="bg-white rounded-3xl shadow-lg border border-pink-100 p-6 flex flex-col md:flex-row gap-4 mb-8">
+            <div class="flex-1">
+                <label class="block text-sm font-bold text-pink-500 mb-1">Họ và tên học sinh 👧👦:</label>
+                <input type="text" id="student-name" class="w-full border-pink-200 bg-pink-50 rounded-xl border-2 p-3 focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none transition font-semibold text-gray-700" placeholder="Nhập tên của em...">
+            </div>
+            <div class="w-full md:w-32">
+                <label class="block text-sm font-bold text-pink-500 mb-1">Lớp 🏫:</label>
+                <input type="text" id="student-class" class="w-full border-pink-200 bg-pink-50 rounded-xl border-2 p-3 focus:ring-4 focus:ring-pink-300 focus:border-pink-400 outline-none transition font-semibold text-gray-700" placeholder="VD: 7A1">
+            </div>
+        </div>
+
+        <!-- Objectives & Instructions -->
+        <div class="card p-6 border-l-8 border-pink-400 bg-white">
+            <h3 class="font-extrabold text-xl mb-3 flex items-center text-pink-600">
+                <span class="text-2xl mr-2">🎯</span> Mục tiêu & Hướng dẫn
+            </h3>
+            <ul class="list-disc pl-5 space-y-2 text-gray-600 font-semibold">
+                <li>Nhận biết được các dấu hiệu của tin giả và cách phòng tránh lừa đảo trên mạng.</li>
+                <li>Hiểu rõ những thông tin cá nhân không nên chia sẻ và biết cách đặt mật khẩu mạnh.</li>
+                <li>Biết sử dụng AI (Trí tuệ nhân tạo) một cách đúng đắn, an toàn và trung thực.</li>
+                <li class="font-bold text-pink-500 mt-4 list-none -ml-5">👉 Hướng dẫn: Em hãy đọc kỹ từng câu hỏi, thao tác trực tiếp (chọn đáp án, kéo thả, nối cột) trên phiếu và bấm "Nộp bài" ở cuối nhé!</li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Trắc nghiệm -->
+        <div id="section-1" class="card config-section">
+            <div class="card-header bg-section-1 flex justify-between items-center">
+                <span>Phần 1: Trắc Nghiệm Nhanh 🚀</span>
+                <span class="text-sm bg-white/30 px-3 py-1 rounded-full shadow-sm" id="s1-score-display">2 điểm</span>
+            </div>
+            <div class="p-6 space-y-6" id="s1-content">
+                <!-- Q1 -->
+                <div class="question-block" data-answer="A">
+                    <p class="font-bold text-gray-700 mb-3 text-lg">Câu 1: Theo cẩm nang, tin giả thường có dấu hiệu nhận biết nào sau đây?</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label><input type="radio" name="q1" value="A" class="hidden"><span class="option-label">A. Tiêu đề giật gân, nhiều dấu chấm than, gây sợ hãi hoặc quá hấp dẫn.</span></label>
+                        <label><input type="radio" name="q1" value="B" class="hidden"><span class="option-label">B. Có nguồn gốc rõ ràng, ghi rõ ngày đăng và tên tác giả cụ thể.</span></label>
+                        <label><input type="radio" name="q1" value="C" class="hidden"><span class="option-label">C. Khuyến khích người đọc tìm hiểu thêm và kiểm chứng thông tin.</span></label>
+                        <label><input type="radio" name="q1" value="D" class="hidden"><span class="option-label">D. Được đăng tải trên các kênh chính thức của nhà trường, chính phủ.</span></label>
+                    </div>
+                    <div class="feedback mt-2 text-sm hidden"></div>
+                </div>
+                <!-- Q2 -->
+                <div class="question-block" data-answer="C">
+                    <p class="font-bold text-gray-700 mb-3 text-lg">Câu 2: Cách đặt mật khẩu nào sau đây được xem là MẠNH và AN TOÀN?</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label><input type="radio" name="q2" value="A" class="hidden"><span class="option-label">A. Dùng dãy số đơn giản cho dễ nhớ như "123456" hay "888888".</span></label>
+                        <label><input type="radio" name="q2" value="B" class="hidden"><span class="option-label">B. Dùng ngày tháng năm sinh hoặc số điện thoại của chính em.</span></label>
+                        <label><input type="radio" name="q2" value="C" class="hidden"><span class="option-label">C. Dài trên 12 ký tự, pha trộn chữ hoa, chữ thường, số và ký hiệu.</span></label>
+                        <label><input type="radio" name="q2" value="D" class="hidden"><span class="option-label">D. Dùng chung một mật khẩu duy nhất cho tất cả các tài khoản.</span></label>
+                    </div>
+                    <div class="feedback mt-2 text-sm hidden"></div>
+                </div>
+                <!-- Q3 -->
+                <div class="question-block" data-answer="B">
+                    <p class="font-bold text-gray-700 mb-3 text-lg">Câu 3: Quy tắc 3K để sử dụng AI (Trí tuệ nhân tạo) an toàn và trung thực là gì?</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label><input type="radio" name="q3" value="A" class="hidden"><span class="option-label">A. Không dùng - Không hỏi - Không chia sẻ.</span></label>
+                        <label><input type="radio" name="q3" value="B" class="hidden"><span class="option-label">B. Không đưa thông tin cá nhân - Kiểm tra lại kết quả - Không chép nguyên văn.</span></label>
+                        <label><input type="radio" name="q3" value="C" class="hidden"><span class="option-label">C. Khen ngợi kết quả - Khuyến khích bạn bè dùng - Khẳng định AI luôn đúng.</span></label>
+                        <label><input type="radio" name="q3" value="D" class="hidden"><span class="option-label">D. Không cần học - Không cần nghĩ - Không lo sai sót.</span></label>
+                    </div>
+                    <div class="feedback mt-2 text-sm hidden"></div>
+                </div>
+                <!-- Q4 -->
+                <div class="question-block" data-answer="B">
+                    <p class="font-bold text-gray-700 mb-3 text-lg">Câu 4: Để kiểm chứng nhanh một tin tức trên mạng, em NÊN đặt câu hỏi nào?</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label><input type="radio" name="q4" value="A" class="hidden"><span class="option-label">A. Tin này có nhiều lượt like và chia sẻ trên mạng không?</span></label>
+                        <label><input type="radio" name="q4" value="B" class="hidden"><span class="option-label">B. Ai đăng? Đăng khi nào, ở đâu? Nơi khác có đưa tin không?</span></label>
+                        <label><input type="radio" name="q4" value="C" class="hidden"><span class="option-label">C. Đọc tin này có thấy thích thú và hợp với suy nghĩ của mình không?</span></label>
+                        <label><input type="radio" name="q4" value="D" class="hidden"><span class="option-label">D. Bạn bè thân thiết của mình đã xem và chia sẻ chưa?</span></label>
+                    </div>
+                    <div class="feedback mt-2 text-sm hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Điền khuyết -->
+        <div id="section-2" class="card config-section">
+            <div class="card-header bg-section-2 flex justify-between items-center">
+                <span>Phần 2: Điền Khuyết ✍️</span>
+                <span class="text-sm bg-white/30 px-3 py-1 rounded-full shadow-sm" id="s2-score-display">2 điểm</span>
+            </div>
+            <div class="p-6 space-y-4 text-lg font-semibold text-gray-600 leading-loose" id="s2-content">
+                <p class="text-emerald-600 mb-2">👉 Chọn từ thích hợp điền vào chỗ trống để hoàn thành các câu sau:</p>
+                
+                <div class="mb-4 question-block fill-blank" data-answer="hoang mang">
+                    <span class="font-bold text-emerald-600">Câu 1:</span> Tin giả là thông tin sai sự thật hoặc bị cắt ghép, bóp méo, được lan truyền để gây 
+                    <select class="border-2 border-emerald-200 rounded-xl p-2 mx-2 focus:ring-4 focus:ring-emerald-300 bg-emerald-50 outline-none text-emerald-800 font-bold cursor-pointer transition">
+                        <option value="">--Chọn--</option>
+                        <option value="hoang mang">hoang mang</option>
+                        <option value="thích thú">thích thú</option>
+                        <option value="tò mò">tò mò</option>
+                    </select>
+                    , câu like hoặc lừa người khác.
+                    <span class="feedback text-sm hidden ml-2"></span>
+                </div>
+
+                <div class="mb-4 question-block fill-blank" data-answer="giả danh">
+                    <span class="font-bold text-emerald-600">Câu 2:</span> Kẻ xấu có thể ghép các mẩu thông tin cá nhân nhỏ để 
+                    <select class="border-2 border-emerald-200 rounded-xl p-2 mx-2 focus:ring-4 focus:ring-emerald-300 bg-emerald-50 outline-none text-emerald-800 font-bold cursor-pointer transition">
+                        <option value="">--Chọn--</option>
+                        <option value="giúp đỡ">giúp đỡ</option>
+                        <option value="bảo vệ">bảo vệ</option>
+                        <option value="giả danh">giả danh</option>
+                    </select>
+                    , lừa tiền hoặc chiếm tài khoản của em.
+                    <span class="feedback text-sm hidden ml-2"></span>
+                </div>
+
+                <div class="mb-4 question-block fill-blank" data-answer="sai">
+                    <span class="font-bold text-emerald-600">Câu 3:</span> Khi sử dụng AI, em cần lưu ý rằng AI có thể trả lời 
+                    <select class="border-2 border-emerald-200 rounded-xl p-2 mx-2 focus:ring-4 focus:ring-emerald-300 bg-emerald-50 outline-none text-emerald-800 font-bold cursor-pointer transition">
+                        <option value="">--Chọn--</option>
+                        <option value="sai">sai</option>
+                        <option value="chậm">chậm</option>
+                        <option value="luôn đúng">luôn đúng</option>
+                    </select>
+                    hoặc nghe rất hợp lý nhưng không đúng sự thật. Nó không thay thế suy nghĩ của em.
+                    <span class="feedback text-sm hidden ml-2"></span>
+                </div>
+
+                <div class="mb-4 question-block fill-blank" data-answer="nguồn">
+                    <span class="font-bold text-emerald-600">Câu 4:</span> Ghi nhớ: Tin thật thường có 
+                    <select class="border-2 border-emerald-200 rounded-xl p-2 mx-2 focus:ring-4 focus:ring-emerald-300 bg-emerald-50 outline-none text-emerald-800 font-bold cursor-pointer transition">
+                        <option value="">--Chọn--</option>
+                        <option value="nguồn">nguồn</option>
+                        <option value="hình ảnh">hình ảnh</option>
+                        <option value="tiêu đề">tiêu đề</option>
+                    </select>
+                    rõ ràng và không ép em phải quyết định trong vài phút.
+                    <span class="feedback text-sm hidden ml-2"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Đúng/Sai -->
+        <div id="section-3" class="card config-section">
+            <div class="card-header bg-section-3 flex justify-between items-center">
+                <span>Phần 3: Đúng hay Sai? 🤔</span>
+                <span class="text-sm bg-white/30 px-3 py-1 rounded-full shadow-sm" id="s3-score-display">2 điểm</span>
+            </div>
+            <div class="p-6 space-y-4" id="s3-content">
+                <div class="overflow-x-auto rounded-xl border border-rose-100">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-rose-50 border-b-2 border-rose-200 text-rose-700">
+                                <th class="p-4 w-3/4 text-lg">Phát biểu</th>
+                                <th class="p-4 text-center text-lg">Đúng ✅</th>
+                                <th class="p-4 text-center text-lg">Sai ❌</th>
+                                <th class="p-4 text-center w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- TF1 -->
+                            <tr class="border-b border-rose-100 question-block tf-row hover:bg-rose-50/50 transition" data-answer="S">
+                                <td class="p-4 font-semibold text-gray-600">1. Em có thể thoải mái chia sẻ ảnh thẻ học sinh và địa chỉ nhà lên mạng xã hội vì đó là thông tin bình thường.</td>
+                                <td class="p-4 text-center"><input type="radio" name="tf1" value="D" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center"><input type="radio" name="tf1" value="S" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center feedback text-2xl"></td>
+                            </tr>
+                            <!-- TF2 -->
+                            <tr class="border-b border-rose-100 question-block tf-row hover:bg-rose-50/50 transition" data-answer="S">
+                                <td class="p-4 font-semibold text-gray-600">2. Mật khẩu nên dùng chung cho tất cả các tài khoản mạng xã hội và email để dễ nhớ, tránh bị quên.</td>
+                                <td class="p-4 text-center"><input type="radio" name="tf2" value="D" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center"><input type="radio" name="tf2" value="S" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center feedback text-2xl"></td>
+                            </tr>
+                            <!-- TF3 -->
+                            <tr class="border-b border-rose-100 question-block tf-row hover:bg-rose-50/50 transition" data-answer="D">
+                                <td class="p-4 font-semibold text-gray-600">3. AI có thể giúp em gợi ý dàn ý bài viết, giải thích các từ khó hiểu và kiểm tra lỗi chính tả.</td>
+                                <td class="p-4 text-center"><input type="radio" name="tf3" value="D" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center"><input type="radio" name="tf3" value="S" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center feedback text-2xl"></td>
+                            </tr>
+                            <!-- TF4 -->
+                            <tr class="border-b border-rose-100 question-block tf-row hover:bg-rose-50/50 transition" data-answer="S">
+                                <td class="p-4 font-semibold text-gray-600">4. Khi nhận được tin nhắn giục "Chia sẻ ngay cho 10 người để nhận quà", em nên làm theo ngay để không bỏ lỡ cơ hội.</td>
+                                <td class="p-4 text-center"><input type="radio" name="tf4" value="D" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center"><input type="radio" name="tf4" value="S" class="w-6 h-6 cursor-pointer accent-rose-500"></td>
+                                <td class="p-4 text-center feedback text-2xl"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Nối cột -->
+        <div id="section-4" class="card config-section">
+            <div class="card-header bg-section-4 flex justify-between items-center">
+                <span>Phần 4: Ghép Nối (Những thông tin không nên chia sẻ) 🧩</span>
+                <span class="text-sm bg-white/30 px-3 py-1 rounded-full shadow-sm" id="s4-score-display">2 điểm</span>
+            </div>
+            <div class="p-6" id="s4-content">
+                <p class="mb-6 font-bold text-indigo-500 text-lg">👉 Hướng dẫn: Nhấp chọn một mục ở Cột A (Nhóm thông tin), sau đó nhấp chọn mục tương ứng ở Cột B (Ví dụ) để ghép nối chúng với nhau.</p>
+                <div class="flex flex-col md:flex-row gap-8 relative">
+                    <!-- Column A -->
+                    <div class="flex-1 flex flex-col gap-4" id="col-a">
+                        <div class="font-extrabold text-center mb-2 text-indigo-700 bg-indigo-50 py-2 rounded-xl border border-indigo-100">CỘT A: Nhóm thông tin</div>
+                        <div class="match-item match-a" data-id="A1">1. Giấy tờ, hình ảnh</div>
+                        <div class="match-item match-a" data-id="A2">2. Địa chỉ, liên lạc</div>
+                        <div class="match-item match-a" data-id="A3">3. Tài khoản</div>
+                        <div class="match-item match-a" data-id="A4">4. Chuyện riêng tư</div>
+                    </div>
+                    <!-- Connection Lines Canvas -->
+                    <svg class="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block" id="match-lines" style="z-index: 1;"></svg>
+                    
+                    <!-- Column B -->
+                    <div class="flex-1 flex flex-col gap-4" id="col-b">
+                        <div class="font-extrabold text-center mb-2 text-indigo-700 bg-indigo-50 py-2 rounded-xl border border-indigo-100">CỘT B: Ví dụ</div>
+                        <div class="match-item match-b" data-id="B4">A. Lịch đi vắng của gia đình, vị trí đang ở.</div>
+                        <div class="match-item match-b" data-id="B1">B. Ảnh thẻ học sinh, ảnh giấy tờ của em.</div>
+                        <div class="match-item match-b" data-id="B2">C. Địa chỉ nhà, số điện thoại, tên trường lớp.</div>
+                        <div class="match-item match-b" data-id="B3">D. Mật khẩu, mã xác thực (OTP).</div>
+                    </div>
+                </div>
+                <div id="match-feedback" class="mt-6 space-y-2 font-bold text-lg"></div>
+            </div>
+        </div>
+
+        <!-- Section 5: Kéo thả -->
+        <div id="section-5" class="card config-section">
+            <div class="card-header bg-section-5 flex justify-between items-center">
+                <span>Phần 5: Phân Loại (Kéo Thả) 📦</span>
+                <span class="text-sm bg-white/30 px-3 py-1 rounded-full shadow-sm" id="s5-score-display">2 điểm</span>
+            </div>
+            <div class="p-6" id="s5-content">
+                <p class="mb-6 font-bold text-purple-600 text-lg">👉 Hướng dẫn: Kéo các thẻ thông tin bên dưới thả vào ô tương ứng. <br><span class="text-sm text-gray-500 font-medium"><em>(Mẹo nhỏ: Trên điện thoại, em có thể <strong>chạm</strong> vào thẻ, sau đó <strong>chạm</strong> vào ô đích để chuyển thẻ vào nhé).</em></span></p>
+                
+                <!-- Draggable Items -->
+                <div class="mb-8 p-6 bg-purple-50 rounded-2xl border-2 border-purple-100 min-h-[100px] flex flex-wrap gap-3 justify-center shadow-inner" id="drag-source">
+                    <div class="drag-item text-purple-800" draggable="true" data-match="zone-1" id="drag1">
+                        <span class="px-2">Mã OTP (Xác thực)</span>
+                    </div>
+                    <div class="drag-item text-purple-800" draggable="true" data-match="zone-2" id="drag2">
+                        <span class="px-2">Bật xác thực 2 lớp</span>
+                    </div>
+                </div>
+
+                <!-- Drop Zones -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="drop-zone-container">
+                        <h4 class="font-extrabold text-center mb-3 text-pink-500 text-lg">THÔNG TIN NÊN GIỮ KÍN 🤫</h4>
+                        <div class="drop-zone" id="zone-1" data-target="zone-1"></div>
+                        <div class="feedback mt-2 text-center text-sm hidden font-bold"></div>
+                    </div>
+                    <div class="drop-zone-container">
+                        <h4 class="font-extrabold text-center mb-3 text-blue-500 text-lg">HÀNH ĐỘNG NÊN LÀM 👍</h4>
+                        <div class="drop-zone" id="zone-2" data-target="zone-2"></div>
+                        <div class="feedback mt-2 text-center text-sm hidden font-bold"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center mt-12 mb-10">
+            <button onclick="submitWorksheet()" id="submit-btn" class="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-black text-2xl py-5 px-14 rounded-full shadow-xl transform transition hover:-translate-y-1 hover:scale-105 active:scale-95 border-4 border-white">
+                🎉 NỘP BÀI & CHẤM ĐIỂM 🎉
+            </button>
+        </div>
+
+        <!-- Result Display -->
+        <div id="result-display" class="hidden card p-10 text-center bg-gradient-to-br from-green-100 to-emerald-200 border-4 border-white shadow-2xl">
+            <h2 class="text-4xl font-black text-green-700 mb-2 drop-shadow-sm">🏆 ĐIỂM CỦA EM 🏆</h2>
+            <div class="text-7xl font-black text-green-600 my-6 drop-shadow-md">
+                <span id="final-score">0</span> / <span id="max-score-display">10</span>
+            </div>
+            <p id="result-message" class="text-xl text-green-800 font-extrabold bg-white/60 py-3 px-6 rounded-full inline-block shadow-sm"></p>
+        </div>
+
+        <!-- Summary -->
+        <div class="card mt-10 bg-amber-50 border-4 border-amber-100 shadow-xl">
+            <div class="p-8">
+                <h3 class="font-black text-2xl mb-6 flex items-center text-amber-600">
+                    <span class="text-4xl mr-3">💡</span> GHI NHỚ SIÊU NHANH
+                </h3>
+                <ul class="space-y-4 text-gray-700 font-bold text-lg">
+                    <li class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100"><span class="font-black text-amber-500 mr-2 text-xl">1.</span> Nhận diện tin giả qua 3 dấu hiệu: <strong class="text-red-500 bg-red-50 px-2 rounded">Giật gân, Không rõ nguồn, Giục chia sẻ gấp</strong>.</li>
+                    <li class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100"><span class="font-black text-amber-500 mr-2 text-xl">2.</span> Không chia sẻ hình ảnh giấy tờ, địa chỉ nhà, mật khẩu, OTP hay lịch đi vắng lên mạng.</li>
+                    <li class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100"><span class="font-black text-amber-500 mr-2 text-xl">3.</span> Mật khẩu mạnh phải dài (12+), pha trộn (chữ, số, ký hiệu) và không dùng thông tin dễ đoán.</li>
+                    <li class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100"><span class="font-black text-amber-500 mr-2 text-xl">4.</span> Dùng AI tuân thủ Quy tắc 3K: <strong class="text-purple-600 bg-purple-50 px-2 rounded">Không đưa thông tin cá nhân - Kiểm tra lại kết quả - Không chép nguyên văn</strong>.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-80 text-center border-4 border-pink-200">
+            <h3 class="font-black text-2xl mb-4 text-pink-600">Quản Trị ⚙️</h3>
+            <input type="password" id="admin-pass" class="w-full border-2 border-pink-200 bg-pink-50 p-3 rounded-xl mb-4 text-center font-bold focus:ring-4 focus:ring-pink-300 outline-none" placeholder="Nhập mật khẩu...">
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeLoginModal()" class="px-5 py-2 bg-gray-200 rounded-xl hover:bg-gray-300 font-bold transition">Hủy</button>
+                <button onclick="verifyAdmin()" class="px-5 py-2 bg-pink-500 text-white rounded-xl hover:bg-pink-600 font-bold transition shadow-md">Xác nhận</button>
+            </div>
+            <p id="login-err" class="text-red-500 font-bold text-sm mt-3 hidden">Mật khẩu không đúng!</p>
+        </div>
+    </div>
+
+    <!-- Admin Settings Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6 border-b-2 border-pink-100 pb-4">
+                <h2 class="text-2xl font-black text-pink-600">Cài Đặt Phiếu Học Tập</h2>
+                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-red-500 transition">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- General Info -->
+                <div>
+                    <h3 class="font-bold text-lg mb-3 bg-pink-50 text-pink-700 p-2 rounded-lg">Thông tin chung</h3>
+                    <div class="grid grid-cols-1 gap-3 font-medium">
+                        <div><label class="block text-sm">Tên bài học</label><input type="text" id="cfg-title" class="w-full border-2 border-gray-200 rounded-lg p-2 focus:border-pink-400 outline-none" value="Em Là Công Dân Số An Toàn"></div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label class="block text-sm">Môn học</label><input type="text" id="cfg-subject" class="w-full border-2 border-gray-200 rounded-lg p-2 focus:border-pink-400 outline-none" value="Hoạt động trải nghiệm"></div>
+                            <div><label class="block text-sm">Lớp</label><input type="text" id="cfg-grade" class="w-full border-2 border-gray-200 rounded-lg p-2 focus:border-pink-400 outline-none" value="7"></div>
+                        </div>
+                        <div><label class="block text-sm">Tổng điểm toàn phiếu (Ví dụ: 10)</label><input type="number" id="cfg-total-score" class="w-full border-2 border-gray-200 rounded-lg p-2 font-black text-pink-600 text-lg focus:border-pink-400 outline-none" value="10"></div>
+                    </div>
+                </div>
+
+                <!-- Sections Config -->
+                <div>
+                    <h3 class="font-bold text-lg mb-3 bg-pink-50 text-pink-700 p-2 rounded-lg">Cấu hình các phần</h3>
+                    <p class="text-sm font-bold text-red-600 mb-3 hidden bg-red-50 p-2 rounded" id="score-warning">⚠️ CẢNH BÁO: Tổng điểm các phần (<span id="sum-score">0</span>) không khớp Tổng điểm toàn phiếu!</p>
+                    
+                    <div class="space-y-3">
+                        <!-- Sec 1 -->
+                        <div class="flex items-center gap-3 p-3 border-2 border-gray-100 rounded-xl hover:border-pink-200 transition">
+                            <input type="checkbox" id="cfg-s1-on" checked class="w-5 h-5 accent-pink-500" onchange="calculateSumScore()">
+                            <span class="flex-1 font-bold text-gray-700">1. Trắc nghiệm</span>
+                            <div class="flex items-center gap-1 w-20"><input type="number" id="cfg-s1-q" value="4" class="w-12 border-2 rounded p-1 text-center font-bold bg-gray-50" readonly></div>
+                            <div class="flex items-center gap-1 w-24"><input type="number" step="0.5" id="cfg-s1-score" value="2" class="w-16 border-2 border-pink-200 rounded p-1 text-center font-bold focus:border-pink-400 outline-none" onchange="calculateSumScore()"> đ</div>
+                        </div>
+                        <!-- Sec 2 -->
+                        <div class="flex items-center gap-3 p-3 border-2 border-gray-100 rounded-xl hover:border-pink-200 transition">
+                            <input type="checkbox" id="cfg-s2-on" checked class="w-5 h-5 accent-pink-500" onchange="calculateSumScore()">
+                            <span class="flex-1 font-bold text-gray-700">2. Điền khuyết</span>
+                            <div class="flex items-center gap-1 w-20"><input type="number" id="cfg-s2-q" value="4" class="w-12 border-2 rounded p-1 text-center font-bold bg-gray-50" readonly></div>
+                            <div class="flex items-center gap-1 w-24"><input type="number" step="0.5" id="cfg-s2-score" value="2" class="w-16 border-2 border-pink-200 rounded p-1 text-center font-bold focus:border-pink-400 outline-none" onchange="calculateSumScore()"> đ</div>
+                        </div>
+                        <!-- Sec 3 -->
+                        <div class="flex items-center gap-3 p-3 border-2 border-gray-100 rounded-xl hover:border-pink-200 transition">
+                            <input type="checkbox" id="cfg-s3-on" checked class="w-5 h-5 accent-pink-500" onchange="calculateSumScore()">
+                            <span class="flex-1 font-bold text-gray-700">3. Đúng/Sai</span>
+                            <div class="flex items-center gap-1 w-20"><input type="number" id="cfg-s3-q" value="4" class="w-12 border-2 rounded p-1 text-center font-bold bg-gray-50" readonly></div>
+                            <div class="flex items-center gap-1 w-24"><input type="number" step="0.5" id="cfg-s3-score" value="2" class="w-16 border-2 border-pink-200 rounded p-1 text-center font-bold focus:border-pink-400 outline-none" onchange="calculateSumScore()"> đ</div>
+                        </div>
+                        <!-- Sec 4 -->
+                        <div class="flex items-center gap-3 p-3 border-2 border-gray-100 rounded-xl hover:border-pink-200 transition">
+                            <input type="checkbox" id="cfg-s4-on" checked class="w-5 h-5 accent-pink-500" onchange="calculateSumScore()">
+                            <span class="flex-1 font-bold text-gray-700">4. Nối cột</span>
+                            <div class="flex items-center gap-1 w-20"><input type="number" id="cfg-s4-q" value="4" class="w-12 border-2 rounded p-1 text-center font-bold bg-gray-50" readonly></div>
+                            <div class="flex items-center gap-1 w-24"><input type="number" step="0.5" id="cfg-s4-score" value="2" class="w-16 border-2 border-pink-200 rounded p-1 text-center font-bold focus:border-pink-400 outline-none" onchange="calculateSumScore()"> đ</div>
+                        </div>
+                        <!-- Sec 5 -->
+                        <div class="flex items-center gap-3 p-3 border-2 border-gray-100 rounded-xl hover:border-pink-200 transition">
+                            <input type="checkbox" id="cfg-s5-on" checked class="w-5 h-5 accent-pink-500" onchange="calculateSumScore()">
+                            <span class="flex-1 font-bold text-gray-700">5. Kéo thả hình/chữ</span>
+                            <div class="flex items-center gap-1 w-20"><input type="number" id="cfg-s5-q" value="2" class="w-12 border-2 rounded p-1 text-center font-bold bg-gray-50" readonly></div>
+                            <div class="flex items-center gap-1 w-24"><input type="number" step="0.5" id="cfg-s5-score" value="2" class="w-16 border-2 border-pink-200 rounded p-1 text-center font-bold focus:border-pink-400 outline-none" onchange="calculateSumScore()"> đ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t-2 border-pink-100 flex justify-end gap-3">
+                    <button onclick="closeAdminModal()" class="px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 font-bold transition">Hủy</button>
+                    <button onclick="saveAdminSettings()" class="px-6 py-3 bg-pink-500 text-white rounded-xl hover:bg-pink-600 font-black shadow-lg transition transform hover:-translate-y-1">Lưu cấu hình</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- MATCHING LOGIC (Section 4) ---
+        let selectedA = null;
+        let selectedB = null;
+        let matchPairs = {}; // A_id -> B_id
+        const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+
+        document.querySelectorAll('.match-a').forEach(item => {
+            item.addEventListener('click', () => {
+                if(document.getElementById('submit-btn').disabled) return;
+                document.querySelectorAll('.match-a').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedA = item;
+                checkPair();
+            });
+        });
+
+        document.querySelectorAll('.match-b').forEach(item => {
+            item.addEventListener('click', () => {
+                if(document.getElementById('submit-btn').disabled) return;
+                document.querySelectorAll('.match-b').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedB = item;
+                checkPair();
+            });
+        });
+
+        function checkPair() {
+            if (selectedA && selectedB) {
+                const idA = selectedA.getAttribute('data-id');
+                const idB = selectedB.getAttribute('data-id');
+                
+                // Clear old visual colors if reassigned
+                if(matchPairs[idA]) {
+                    const oldB = document.querySelector(`.match-b[data-id="${matchPairs[idA]}"]`);
+                    if(oldB) { oldB.style.borderColor = '#e5e7eb'; oldB.style.backgroundColor = '#ffffff'; oldB.style.color = '#4b5563';}
+                }
+                
+                // Remove B from other A if exists
+                for (let key in matchPairs) {
+                    if (matchPairs[key] === idB) delete matchPairs[key];
+                }
+
+                matchPairs[idA] = idB;
+                
+                // Apply visual pair
+                const pairColor = colors[Object.keys(matchPairs).length % colors.length];
+                selectedA.style.borderColor = pairColor;
+                selectedA.style.backgroundColor = pairColor + '15'; // slight opacity
+                selectedA.style.color = pairColor;
+                
+                selectedB.style.borderColor = pairColor;
+                selectedB.style.backgroundColor = pairColor + '15';
+                selectedB.style.color = pairColor;
+
+                // Reset selection state
+                selectedA.classList.remove('selected');
+                selectedB.classList.remove('selected');
+                selectedA = null;
+                selectedB = null;
+            }
+        }
+
+        // --- DRAG AND DROP LOGIC (Section 5) ---
+        let selectedDragItem = null;
+
+        document.querySelectorAll('.drag-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                if(document.getElementById('submit-btn').disabled) return;
+                e.dataTransfer.setData('text/plain', e.target.id);
+                setTimeout(() => e.target.style.opacity = '0.5', 0);
+            });
+            item.addEventListener('dragend', (e) => {
+                e.target.style.opacity = '1';
+            });
+            item.addEventListener('click', (e) => {
+                if(document.getElementById('submit-btn').disabled) return;
+                if (selectedDragItem) selectedDragItem.classList.remove('selected');
+                selectedDragItem = e.target.closest('.drag-item');
+                selectedDragItem.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.drop-zone, #drag-source').forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if(zone.id !== 'drag-source') zone.classList.add('dragover');
+            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                if(document.getElementById('submit-btn').disabled) return;
+                const id = e.dataTransfer.getData('text/plain');
+                const draggableElement = document.getElementById(id);
+                if (draggableElement) zone.appendChild(draggableElement);
+            });
+            zone.addEventListener('click', (e) => {
+                if(document.getElementById('submit-btn').disabled) return;
+                if (selectedDragItem) {
+                    zone.appendChild(selectedDragItem);
+                    selectedDragItem.classList.remove('selected');
+                    selectedDragItem = null;
+                }
+            });
+        });
+
+        // --- STREAMING_CHUNK:Config and Scoring Functions... ---
+        let appConfig = {
+            title: "Em Là Công Dân Số An Toàn",
+            subject: "Hoạt động trải nghiệm",
+            grade: "7",
+            totalScore: 10,
+            sections: {
+                s1: { active: true, q: 4, score: 2 },
+                s2: { active: true, q: 4, score: 2 },
+                s3: { active: true, q: 4, score: 2 },
+                s4: { active: true, q: 4, score: 2 },
+                s5: { active: true, q: 2, score: 2 }
+            }
+        };
+
+        const ansKey = {
+            s4: { 'A1': 'B1', 'A2': 'B2', 'A3': 'B3', 'A4': 'B4' }
+        };
+
+        window.onload = () => {
+            const savedConfig = localStorage.getItem('pht_CDSA_cute_config');
+            if (savedConfig) {
+                appConfig = JSON.parse(savedConfig);
+                applyConfigToUI();
+            }
+        };
+
+        function roundScore(num) {
+            return Math.round(num * 100) / 100;
+        }
+
+        function submitWorksheet() {
+            const name = document.getElementById('student-name').value.trim();
+            if (!name) {
+                alert("Bạn ơi, hãy nhập tên của mình trước khi nộp bài nhé! 😊");
+                document.getElementById('student-name').focus();
+                return;
+            }
+
+            let totalAchieved = 0;
+
+            // Chấm S1 (Trắc nghiệm)
+            if (appConfig.sections.s1.active) {
+                let correctCount = 0;
+                document.querySelectorAll('#section-1 .question-block').forEach((block, index) => {
+                    const ans = block.getAttribute('data-answer');
+                    const selected = block.querySelector(`input[name="q${index+1}"]:checked`);
+                    const fb = block.querySelector('.feedback');
+                    fb.classList.remove('hidden');
+                    
+                    if (selected && selected.value === ans) {
+                        correctCount++;
+                        fb.innerHTML = `✨ Chính xác!`;
+                        fb.className = "feedback mt-2 text-base correct-text";
+                    } else {
+                        fb.innerHTML = `❌ Rất tiếc, đáp án đúng là: ${ans}`;
+                        fb.className = "feedback mt-2 text-base wrong-text";
+                    }
+                    block.querySelectorAll('input').forEach(i => i.disabled = true);
+                });
+                totalAchieved += (correctCount / appConfig.sections.s1.q) * appConfig.sections.s1.score;
+            }
+
+            // Chấm S2 (Điền khuyết)
+            if (appConfig.sections.s2.active) {
+                let correctCount = 0;
+                document.querySelectorAll('#section-2 .fill-blank').forEach((block) => {
+                    const ans = block.getAttribute('data-answer');
+                    const select = block.querySelector('select');
+                    const val = select.value;
+                    const fb = block.querySelector('.feedback');
+                    fb.classList.remove('hidden');
+                    
+                    if (val === ans) {
+                        correctCount++;
+                        select.classList.add('correct-bg');
+                        fb.innerHTML = '✨ Đúng';
+                        fb.className = "feedback text-base correct-text ml-2 inline-block";
+                    } else {
+                        select.classList.add('wrong-bg');
+                        fb.innerHTML = `❌ (Đúng là: ${ans})`;
+                        fb.className = "feedback text-base wrong-text ml-2 inline-block";
+                    }
+                    select.disabled = true;
+                });
+                totalAchieved += (correctCount / appConfig.sections.s2.q) * appConfig.sections.s2.score;
+            }
+
+            // Chấm S3 (Đúng/Sai)
+            if (appConfig.sections.s3.active) {
+                let correctCount = 0;
+                document.querySelectorAll('.tf-row').forEach((row, index) => {
+                    const ans = row.getAttribute('data-answer');
+                    const selected = row.querySelector(`input[name="tf${index+1}"]:checked`);
+                    const fb = row.querySelector('.feedback');
+                    
+                    if (selected && selected.value === ans) {
+                        correctCount++;
+                        fb.innerHTML = '✨';
+                        fb.className = "p-4 text-center feedback text-3xl correct-text";
+                    } else {
+                        fb.innerHTML = '❌';
+                        fb.className = "p-4 text-center feedback text-3xl wrong-text";
+                    }
+                    row.querySelectorAll('input').forEach(i => i.disabled = true);
+                });
+                totalAchieved += (correctCount / appConfig.sections.s3.q) * appConfig.sections.s3.score;
+            }
+
+            // Chấm S4 (Nối cột)
+            if (appConfig.sections.s4.active) {
+                let correctCount = 0;
+                const fbContainer = document.getElementById('match-feedback');
+                fbContainer.innerHTML = '';
+                
+                ['A1', 'A2', 'A3', 'A4'].forEach((a_id) => {
+                    const correctB = ansKey.s4[a_id];
+                    const userB = matchPairs[a_id];
+                    const textA = document.querySelector(`.match-a[data-id="${a_id}"]`).innerText;
+                    
+                    let p = document.createElement('p');
+                    if (userB === correctB) {
+                        correctCount++;
+                        p.innerHTML = `✨ Tuyệt vời! "${textA}" ghép chính xác.`;
+                        p.className = 'correct-text text-base bg-green-50 p-2 rounded-lg';
+                    } else {
+                        const correctBText = document.querySelector(`.match-b[data-id="${correctB}"]`).innerText.substring(3);
+                        p.innerHTML = `❌ Rất tiếc, "${textA}" nên được ghép với: "${correctBText}"`;
+                        p.className = 'wrong-text text-base bg-red-50 p-2 rounded-lg';
+                    }
+                    fbContainer.appendChild(p);
+                });
+                totalAchieved += (correctCount / appConfig.sections.s4.q) * appConfig.sections.s4.score;
+            }
+
+            // Chấm S5 (Kéo thả)
+            if (appConfig.sections.s5.active) {
+                let correctCount = 0;
+                ['zone-1', 'zone-2'].forEach(zoneId => {
+                    const zone = document.getElementById(zoneId);
+                    const items = zone.querySelectorAll('.drag-item');
+                    const fb = zone.nextElementSibling;
+                    fb.classList.remove('hidden');
+                    
+                    let ok = true;
+                    items.forEach(item => {
+                        if(item.getAttribute('data-match') !== zoneId) ok = false;
+                        else correctCount++;
+                    });
+                    
+                    if (items.length > 0) {
+                        zone.style.backgroundColor = ok ? '#dcfce7' : '#ffe4e6';
+                        zone.style.borderColor = ok ? '#22c55e' : '#e11d48';
+                        fb.innerHTML = ok ? '✨ Phân loại chuẩn xác!' : '❌ Ôi, có thẻ bị đặt nhầm chỗ rồi';
+                        fb.className = ok ? "feedback mt-2 text-center text-base correct-text block" : "feedback mt-2 text-center text-base wrong-text block";
+                    }
+                });
+                totalAchieved += (correctCount / appConfig.sections.s5.q) * appConfig.sections.s5.score;
+            }
+
+            // Disable Submit
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = "🌟 ĐÃ NỘP BÀI 🌟";
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            // Show Results
+            document.getElementById('final-score').innerText = roundScore(totalAchieved);
+            document.getElementById('max-score-display').innerText = appConfig.totalScore;
+            
+            const msg = document.getElementById('result-message');
+            const percent = totalAchieved / appConfig.totalScore;
+            if (percent >= 0.8) msg.innerHTML = "Tuyệt vời! Em chính là một Công Dân Số Thông Thái! 🦸‍♂️🦸‍♀️";
+            else if (percent >= 0.5) msg.innerHTML = "Khá tốt! Em hãy xem lại các câu sai để ghi nhớ thêm nhé. 💪";
+            else msg.innerHTML = "Cố lên em! Đọc lại ghi nhớ bên dưới để nắm vững quy tắc nhé! 📚";
+            
+            document.getElementById('result-display').classList.remove('hidden');
+            document.getElementById('result-display').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- STREAMING_CHUNK:Admin and Config Setup... ---
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+            document.getElementById('admin-pass').value = '';
+            document.getElementById('login-err').classList.add('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === '1230') {
+                closeLoginModal();
+                openAdminModal();
+            } else {
+                document.getElementById('login-err').classList.remove('hidden');
+            }
+        }
+
+        function openAdminModal() {
+            document.getElementById('cfg-title').value = appConfig.title;
+            document.getElementById('cfg-subject').value = appConfig.subject;
+            document.getElementById('cfg-grade').value = appConfig.grade;
+            document.getElementById('cfg-total-score').value = appConfig.totalScore;
+
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`cfg-s${i}-on`).checked = appConfig.sections[`s${i}`].active;
+                document.getElementById(`cfg-s${i}-score`).value = appConfig.sections[`s${i}`].score;
+            }
+            
+            calculateSumScore();
+            document.getElementById('admin-modal').classList.add('active');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.remove('active');
+        }
+
+        function calculateSumScore() {
+            let sum = 0;
+            for (let i = 1; i <= 5; i++) {
+                if (document.getElementById(`cfg-s${i}-on`).checked) {
+                    sum += parseFloat(document.getElementById(`cfg-s${i}-score`).value || 0);
+                }
+            }
+            document.getElementById('sum-score').innerText = sum;
+            
+            const total = parseFloat(document.getElementById('cfg-total-score').value || 0);
+            if (sum !== total) {
+                document.getElementById('score-warning').classList.remove('hidden');
+            } else {
+                document.getElementById('score-warning').classList.add('hidden');
+            }
+            return sum;
+        }
+
+        function saveAdminSettings() {
+            const total = parseFloat(document.getElementById('cfg-total-score').value || 0);
+            const sum = calculateSumScore();
+            
+            if (sum !== total) {
+                if(!confirm(`CẢNH BÁO: Tổng điểm các phần (${sum}) đang khác Tổng điểm toàn phiếu (${total}).\nBạn có chắc chắn muốn lưu?`)) {
+                    return;
+                }
+            }
+
+            appConfig.title = document.getElementById('cfg-title').value;
+            appConfig.subject = document.getElementById('cfg-subject').value;
+            appConfig.grade = document.getElementById('cfg-grade').value;
+            appConfig.totalScore = total;
+
+            for (let i = 1; i <= 5; i++) {
+                appConfig.sections[`s${i}`].active = document.getElementById(`cfg-s${i}-on`).checked;
+                appConfig.sections[`s${i}`].score = parseFloat(document.getElementById(`cfg-s${i}-score`).value || 0);
+            }
+
+            localStorage.setItem('pht_CDSA_cute_config', JSON.stringify(appConfig));
+            applyConfigToUI();
+            closeAdminModal();
+            alert("✨ Đã lưu cấu hình thành công!");
+        }
+
+        function applyConfigToUI() {
+            document.title = "Phiếu Học Tập: " + appConfig.title;
+            document.getElementById('display-lesson-title').innerText = appConfig.title;
+            document.getElementById('display-subject-grade').innerText = `Môn: ${appConfig.subject} • Lớp ${appConfig.grade}`;
+
+            for (let i = 1; i <= 5; i++) {
+                const sectionDiv = document.getElementById(`section-${i}`);
+                if (appConfig.sections[`s${i}`].active) {
+                    sectionDiv.style.display = 'block';
+                    document.getElementById(`s${i}-score-display`).innerText = appConfig.sections[`s${i}`].score + ' điểm';
+                } else {
+                    sectionDiv.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
